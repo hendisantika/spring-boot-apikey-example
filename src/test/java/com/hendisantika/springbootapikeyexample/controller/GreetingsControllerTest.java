@@ -37,4 +37,11 @@ class GreetingsControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(content().string(containsString("Greetings")));
     }
+
+    @Test
+    void shouldGetProtectedGreetings() throws Exception {
+        this.mockMvc.perform(get("/protected/greetings").header("ApiKey", apiKey))
+                .andExpect(status().isOk())
+                .andExpect(content().string(containsString("Greetings")));
+    }
 }
