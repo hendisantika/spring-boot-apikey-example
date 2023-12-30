@@ -44,4 +44,10 @@ class GreetingsControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(content().string(containsString("Greetings")));
     }
+
+    @Test
+    void shouldReturnError_IfWrongApiKeyIsProvided_WhenAccessingProtectedGreetings() throws Exception {
+        this.mockMvc.perform(get("/protected/greetings").header("ApiKey", "mywrongkey"))
+                .andExpect(status().isUnauthorized());
+    }
 }
