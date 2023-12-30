@@ -9,6 +9,9 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 
 import javax.sql.DataSource;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -41,6 +44,37 @@ public class ApiKeyAuthManager implements AuthenticationManager {
         } else {
             authentication.setAuthenticated(true);
             return authentication;
+        }
+    }
+
+    /**
+     * Caffeine CacheLoader that checks the database for the api key if it not found in the cache.
+     */
+    private static class DatabaseCacheLoader implements CacheLoader<String, Boolean> {
+        private final DataSource dataSource;
+
+        DatabaseCacheLoader(DataSource dataSource) {
+            this.dataSource = dataSource;
+        }
+
+        @Override
+        public Boolean load(String key) throws Exception {
+            log.info("Loading api key from database: [key: {}]", key);
+
+            try (Connection conn = dataSource.getConnection()) {
+                try (PreparedStatement ps = conn.prepareStatement("SELECT * FROM auth WHERE api_key = ?")) {
+                    ps.setObject(1, UUIDUtil.fromHex(key));
+
+                    try (ResultSet rs = ps.executeQuery()) {
+                        // Valid API Key
+                        // Invalid API Key
+                        return rs.next();
+                    }
+                }
+            } catch (Exception e) {
+                log.error("An error occurred while retrieving api key from database", e);
+                return false;
+            }
         }
     }
 
