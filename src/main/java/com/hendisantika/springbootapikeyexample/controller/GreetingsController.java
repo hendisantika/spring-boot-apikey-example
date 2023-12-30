@@ -1,6 +1,8 @@
 package com.hendisantika.springbootapikeyexample.controller;
 
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
@@ -16,5 +18,8 @@ import org.springframework.web.bind.annotation.RestController;
 @Slf4j
 @RestController
 public class GreetingsController {
-
+    @GetMapping("/public/greetings")
+    public ResponseEntity<String> getPublicGreetings() {
+        return ResponseEntity.ok("Greetings from a public endpoint!");
+    }
 }
