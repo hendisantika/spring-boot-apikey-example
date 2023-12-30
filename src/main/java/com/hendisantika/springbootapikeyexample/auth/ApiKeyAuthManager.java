@@ -1,8 +1,12 @@
 package com.hendisantika.springbootapikeyexample.auth;
 
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.boot.autoconfigure.cache.CacheProperties;
 import org.springframework.cglib.core.internal.LoadingCache;
 import org.springframework.security.authentication.AuthenticationManager;
+
+import javax.sql.DataSource;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Created by IntelliJ IDEA.
@@ -19,4 +23,9 @@ public class ApiKeyAuthManager implements AuthenticationManager {
 
     private final LoadingCache<String, Boolean> keys;
 
+    public ApiKeyAuthManager(DataSource dataSource) {
+        this.keys = CacheProperties.Caffeine.newBuilder()
+                .expireAfterAccess(5, TimeUnit.MINUTES)
+                .build(new DatabaseCacheLoader(dataSource));
+    }
 }
